@@ -5,9 +5,6 @@ Mongoid.load!(File.join(File.dirname(__FILE__), 'config', 'mongoid.yml'))
 
 require './decorators/service.rb'
 require './controllers/service.rb'
-require './controllers/help.rb'
-
-binding.pry
 
 Arkaan::Monitoring::Service.each do |service|
   map(service.path) { run Controllers::Service.new(service) }
