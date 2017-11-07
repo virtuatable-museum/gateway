@@ -13,8 +13,8 @@ module Controllers
     end
 
     get '/' do
-      status = forwarded.status
-      body = forwarded.body
+      status forwarded.status
+      body forwarded.body
     end
   end
 end
