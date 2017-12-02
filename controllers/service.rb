@@ -27,22 +27,22 @@ module Controllers
       end
     end
 
-    get '/infos' do
-      "#{service.key} - #{service.path} - #{instance.url}"
+    post '/' do
+      @body = JSON.parse(request.body.read.to_s) rescue {}
+      @body['token'] = Utils::Seeder.instance.create_gateway.token
+      @forwarded = forward_post(service.path, @body.to_json)
+      status @forwarded.status
+      body @forwarded.body
     end
 
-    post '/' do
-      @body = request.body.read.to_s rescue {}.to_json
-      params[:token] = Utils::Seeder.instance.create_gateway.token
-      @response = connection.post do |forward|
-        forward.url '/', params
-        forward.body = @body
+    def forward_post(url, body)
+      return connection.post do |forward|
+        forward.url url, params
+        forward.body = body
         forward.headers['Content-Type'] = 'application/json'
         forward.options.timeout = 5
         forward.options.open_timeout = 2
       end
-      status @response.status
-      body @response.body
     end
   end
 end
