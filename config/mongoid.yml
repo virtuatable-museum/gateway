@@ -13,4 +13,4 @@ test:
 production:
   clients:
     default:
-      uri: mongodb://arkaan-gateway:wormforgetpileexcuse@ds149535.mlab.com:49535/arkaan
+      uri: <%= ENV['MONGODB_URL'] %>
