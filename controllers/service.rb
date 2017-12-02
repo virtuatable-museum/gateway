@@ -27,6 +27,10 @@ module Controllers
       end
     end
 
+    get '/infos' do
+      "#{connection.url} - #{service.key} - #{service.path} - #{instance.url}"
+    end
+
     post '/' do
       @body = request.body.read.to_s rescue {}.to_json
       params[:token] = Utils::Seeder.instance.create_gateway.token
