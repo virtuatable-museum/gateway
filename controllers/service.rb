@@ -28,7 +28,7 @@ module Controllers
     end
 
     get '/infos' do
-      "#{connection.url} - #{service.key} - #{service.path} - #{instance.url}"
+      "#{service.key} - #{service.path} - #{instance.url}"
     end
 
     post '/' do
