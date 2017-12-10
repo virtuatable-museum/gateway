@@ -36,8 +36,7 @@ module Controllers
 
     get '/:id' do
       params['token'] = Utils::Seeder.instance.create_gateway.token
-      params.delete!('id')
-      @forwarded = forward_get(service.path, @body.to_json)
+      @forwarded = forward_get("#{service.path}/#{params['id']}")
       halt @forwarded.status, @forwarded.body
     end
 
