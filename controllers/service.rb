@@ -31,8 +31,14 @@ module Controllers
       @body = JSON.parse(request.body.read.to_s) rescue {}
       @body['token'] = Utils::Seeder.instance.create_gateway.token
       @forwarded = forward_post(service.path, @body.to_json)
-      status @forwarded.status
-      body @forwarded.body
+      halt @forwarded.status, @forwarded.body
+    end
+
+    get '/:id' do
+      params['token'] = Utils::Seeder.instance.create_gateway.token
+      params.delete!('id')
+      @forwarded = forward_get(service.path, @body.to_json)
+      halt @forwarded.status, @forwarded.body
     end
 
     def forward_post(url, body)
@@ -43,6 +49,13 @@ module Controllers
         forward.options.timeout = 5
         forward.options.open_timeout = 2
       end
+    end
+
+    def forward_get(url)
+      forward.url url, params
+      forward.headers['Content-Type'] = 'application/json'
+      forward.options.timeout = 5
+      forward.options.open_timeout = 2
     end
   end
 end
