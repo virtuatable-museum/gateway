@@ -41,20 +41,22 @@ module Controllers
     end
 
     def forward_post(url, body)
-      return connection.post do |forward|
-        forward.url url, params
-        forward.body = body
-        forward.headers['Content-Type'] = 'application/json'
-        forward.options.timeout = 5
-        forward.options.open_timeout = 2
+      return connection.post do |forwarded_req|
+        forwarded_req.url url, params
+        forwarded_req.body = body
+        forwarded_req.headers['Content-Type'] = 'application/json'
+        forwarded_req.options.timeout = 5
+        forwarded_req.options.open_timeout = 2
       end
     end
 
     def forward_get(url)
-      forward.url url, params
-      forward.headers['Content-Type'] = 'application/json'
-      forward.options.timeout = 5
-      forward.options.open_timeout = 2
+      return connection.get do |forwarded_req|
+        forwarded_req.url url, params
+        forwarded_req.headers['Content-Type'] = 'application/json'
+        forwarded_req.options.timeout = 5
+        forwarded_req.options.open_timeout = 2
+      end
     end
   end
 end
