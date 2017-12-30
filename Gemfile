@@ -9,3 +9,11 @@ group :development, :production, :test do
   gem 'faraday'        , '0.13.1'
   gem 'pry'            , '0.11.1'
 end
+
+group :test do
+  gem 'rspec'
+  gem 'factory_girl'
+  gem 'database_cleaner'
+  gem 'rack-test', require: 'rack/test'
+  gem 'simplecov'
+end

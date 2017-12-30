@@ -9,7 +9,7 @@ module Utils
     def create_gateway
       gateway = Arkaan::Monitoring::Gateway.where(url: ENV['GATEWAY_URL']).first
       if gateway.nil?
-        gateway = Arkaan::Monitoring::Gateway.create!(url: ENV['GATEWAY_URL'], running: true, token: ENV['GATEWAY_TOKEN'])
+        gateway = Arkaan::Monitoring::Gateway.create!(url: ENV['GATEWAY_URL'], running: true, active: true, token: ENV['GATEWAY_TOKEN'])
       end
       return gateway
     end
