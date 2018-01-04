@@ -16,4 +16,5 @@ group :test do
   gem 'database_cleaner'
   gem 'rack-test', require: 'rack/test'
   gem 'simplecov'
+  gem 'webmock', require: 'webmock/rspec'
 end
