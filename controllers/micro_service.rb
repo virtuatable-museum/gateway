@@ -14,7 +14,7 @@ module Controllers
       controllerClass = Class.new(Sinatra::Base) do
         # @!attribute [r] forward_tunnel
         #   @return [Faraday] the connection to the instance of the service on which you forward the requests.
-        attr_reader :forward_tunnel
+        attr_reader :tunnel_to_service
         # @!attribute [r] instance
         #   @return [Arkaan::Monitoring::Instance] the instance of the service on when the gateway forwards the request.
         # @todo Make the choice of the instance dynamic for each request, not at creation.
@@ -33,7 +33,7 @@ module Controllers
           @gateway_token = Utils::Seeder.instance.create_gateway.token
           @instance = service.instances.sample
           @stored_service = service
-          @forward_tunnel = Faraday.new(instance.url) do |faraday|
+          @tunnel_to_service = Faraday.new(instance.url) do |faraday|
             faraday.request  :url_encoded
             faraday.response :logger
             faraday.adapter  Faraday.default_adapter
@@ -52,8 +52,8 @@ module Controllers
                 if Arkaan::OAuth::Application.where(key: application_key).first.nil?
                   halt 404, {message: 'application_not_found'}.to_json
                 else
-                  forwarded = forward_request(request)
-                  halt forwarded.status, forwarded.body
+                  forwarded_to_service = forward_to_service(request)
+                  halt forwarded_to_service.status, forwarded_to_service.body
                 end
               end
             end
@@ -61,17 +61,17 @@ module Controllers
         end
 
         # Forwards a request to the dedicated micro service and returns the response it gave.
-        # @param request_to_forward [Request] the request the user made on the gateway.
+        # @param forwarded_to_service [Request] the request the user made on the gateway.
         # @return [Response] the faraday response of the micro service for this request.
-        def forward_request(request_to_forward)
+        def forward_to_service(forwarded_to_service)
           parameters = request.env['rack.request.query_hash']
           if parameters != {}
             parameters['token'] = gateway_token
           else
             @parsed_body['token'] = gateway_token
           end
-          forward_tunnel.public_send(request_to_forward.env['REQUEST_METHOD'].downcase) do |req|
-            req.url "#{stored_service.path}#{request_to_forward.path_info}", parameters || {}
+          tunnel_to_service.public_send(forwarded_to_service.env['REQUEST_METHOD'].downcase) do |req|
+            req.url "#{stored_service.path}#{forwarded_to_service.path_info}", parameters || {}
             req.body = @parsed_body.to_json
             req.headers['Content-Type'] = 'application/json'
             req.options.timeout = 5
