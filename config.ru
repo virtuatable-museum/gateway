@@ -13,4 +13,4 @@ Arkaan::Monitoring::Service.each do |service|
   map(service.path) { run Controllers::MicroService.build_from(service) }
 end
 
-map('/') { Controllers::Default.new }
+map('/') { run Controllers::Default.new }
