@@ -14,5 +14,7 @@ module Controllers
     delete '/*' do
       halt 404, {message: 'path_not_found'}.to_json
     end
+    # This route is to avoid the "downstream app not set" error.
+    get '/favicon.ico' do; end
   end
 end
