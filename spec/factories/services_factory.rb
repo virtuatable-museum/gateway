@@ -19,5 +19,49 @@ FactoryGirl.define do
         service.save!
       end
     end
+
+    factory :inactive_services do
+      key 'test'
+      path '/test'
+      premium true
+
+      factory :inactive_service do
+        active false
+
+        after :create do |evaluator, service|
+          service.routes = [
+            Arkaan::Monitoring::Route.new(path: '/first', premium: true, verb: 'get')
+          ]
+          service.instances = [
+            Arkaan::Monitoring::Instance.new(url: 'https://service.com/', running: true)
+          ]
+          service.save!
+        end
+      end
+
+      factory :service_with_inactive_route do
+        after :create do |evaluator, service|
+          service.routes = [
+            Arkaan::Monitoring::Route.new(path: '/first', premium: true, verb: 'get', active: false)
+          ]
+          service.instances = [
+            Arkaan::Monitoring::Instance.new(url: 'https://service.com/', running: true)
+          ]
+          service.save!
+        end
+      end
+
+      factory :service_with_inactive_instance do
+        after :create do |evaluator, service|
+          service.routes = [
+            Arkaan::Monitoring::Route.new(path: '/first', premium: true, verb: 'get')
+          ]
+          service.instances = [
+            Arkaan::Monitoring::Instance.new(url: 'https://service.com/', running: true, active: false)
+          ]
+          service.save!
+        end
+      end
+    end
   end
 end

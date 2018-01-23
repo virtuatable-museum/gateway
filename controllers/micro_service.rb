@@ -44,6 +44,14 @@ module Controllers
           # gateway token.
           stored_service.routes.each do |route|
             self.class.public_send(route.verb, route.path) do
+              stored_service.reload
+              if !stored_service.active?
+                halt 400, {message: 'inactive_service'}.to_json
+              elsif stored_service.instances.active.empty?
+                halt 400, {message: 'no_instance_available'}.to_json
+              elsif !route.active?
+                halt 400, {message: 'inactive_route'}.to_json
+              end
               @parsed_body = JSON.parse(request.body.read.to_s) rescue {}
               application_key = parse_application_key
               if application_key.nil?
