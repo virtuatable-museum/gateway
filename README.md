@@ -20,25 +20,37 @@ You MUST ensure that ALL these environment variables are defined before passing 
 ##### Gateway token
 
 __Name :__ GATEWAY_TOKEN
+
 __Meaning :__ the uniq identification token for this gateway. This token SHOULD not be identical to another gateway token, correct behaviour is NOT guaranteed if two gateways use the same token.
+
 __Type :__ String
+
 __Constraints :__ None
+
 __Advices :__ This token SHOULD be at least 32 characters long to ensure security considerations.
 
 ##### Gateway URL
 
 __Name :__ GATEWAY_URL
+
 __Meaning :__ The current URL to make requests on this gateway. If two instances of the gateway have the same GATEWAY_TOKEN, one will not be taken in account, thus will be inactive.
+
 __TYPE :__ String
+
 __Constraints :__ This variable MUST have an URL format. This variable MUST end with a final slash ('/') symbol.
+
 __Advices :__ None
 
 ##### MongoDB URL
 
 __Name :__ MONGODB_URL
+
 __meaning :__ This is the URL to contact the database linked to this instance of the gateway.
+
 __TYPE :__ String
+
 __Constraints :__ This variable MUST be a valid Mongo DB URL, otherwise the application will crash on startup.
+
 __Advices :__ None
 
 ### Procedures
@@ -81,30 +93,43 @@ The gateway can detect if a service is currently disabled (therefore deemed as "
 #### Inactive service error
 
 __Precondition :__ An entire service has been marked as "inactive" in the database.
-__Scenario :__ A user tries to make a request on one of the routes of this service.
-__Response status :__ 400 (Bad Request)
-__Response format :__ JSON string.
-__Response body :__ `{'message': 'inactive_service'}`
-__Solution :__ Wait for the service to be available, or contact us directly to have more informations on the problem.
 
+__Scenario :__ A user tries to make a request on one of the routes of this service.
+
+__Response status :__ 400 (Bad Request)
+
+__Response format :__ JSON string.
+
+__Response body :__ `{'message': 'inactive_service'}`
+
+__Solution :__ Wait for the service to be available, or contact us directly to have more informations on the problem.
 
 #### Inactive service error
 
 __Precondition :__ The route you're trying to reach has been marked as "inactive" in the database.
-__Scenario :__ A user tries to make a request on a route marked as inactive.
-__Response status :__ 400 (Bad Request)
-__Response format :__ JSON string.
-__Response body :__ `{'message': 'inactive_route'}`
-__Solution :__ Wait for the route to be available, or contact us directly to have more informations on the problem.
 
+__Scenario :__ A user tries to make a request on a route marked as inactive.
+
+__Response status :__ 400 (Bad Request)
+
+__Response format :__ JSON string.
+
+__Response body :__ `{'message': 'inactive_route'}`
+
+__Solution :__ Wait for the route to be available, or contact us directly to have more informations on the problem.
 
 #### No available instances errors
 
 __Precondition :__ All the instances of a service have been marked as inactive in the database.
+
 __Scenario :__ A user tries to make a request on a service that has no activated instances.
+
 __Response status :__ 400 (Bad Request)
+
 __Response format :__ JSON string.
+
 __Response body :__ `{'message': 'no_instance_available'}`
+
 __Solution :__ This might be a big problem on our infrastructure, wait for our communication on it or contact us directly.
 
 ### Application identity check
@@ -114,19 +139,29 @@ The gateway checks if the user making the request is one of the applications reg
 #### No application token given.
 
 __Precondition :__ None
+
 __Scenario :__ A user makes a request on a gateway without providing a `app_key` field in the querystring.
+
 __Response status :__ 400 (Bad Request)
+
 __Response format :__ JSON string.
+
 __Response body :__ `{'message': 'bad_request`}`
+
 __Solution :__ Provide your application key to make requests on the gateway.
 
 #### Unexisting application token given.
 
 __Precondition :__ None
+
 __Scenario :__ A user makes a request on a gateway providing a `app_key` field that can't be linked to any application.
+
 __Response status :__ 404 (Not Found)
+
 __Response format :__ JSON string.
+
 __Response body :__ `{'message': 'application_not_found`}`
+
 __Solution :__ Check the spelling of your application key and the existence of your application. Contact us for more informations.
 
 ### Nominal behaviour
