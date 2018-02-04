@@ -82,8 +82,8 @@ module Controllers
             req.url "#{stored_service.path}#{forwarded_to_service.path_info}", parameters || {}
             req.body = @parsed_body.to_json
             req.headers['Content-Type'] = 'application/json'
-            req.options.timeout = 5
-            req.options.open_timeout = 2
+            req.options.timeout = 20
+            req.options.open_timeout = 20
           end
         end
 
