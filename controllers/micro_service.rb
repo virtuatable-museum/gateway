@@ -46,7 +46,7 @@ module Controllers
             self.class.public_send(route.verb, route.path) do
               stored_service.reload
 
-              check_server_activity
+              check_service_activity
               check_instances_availability
               check_route_activity(route)
               check_application_key
@@ -62,42 +62,56 @@ module Controllers
           end
         end
 
-        def check_server_activity
+        # Checks if the service is currently marked 'active' and halts if not. 
+        def check_service_activity
           halt 400, {message: 'inactive_service'}.to_json if !stored_service.active?      
         end
 
+        # Checks if any instance is available on the service, halts if not.
         def check_instances_availability
           halt 400, {message: 'no_instance_available'}.to_json if stored_service.instances.active.empty?
         end
 
+        # Checks if the route is currently marked 'active', halts if not.
+        # @param route [Arkaan::Monitoring::Route] the route to check the inactivity of.
         def check_route_activity(route)
           halt 400, {message: 'inactive_route'}.to_json if !route.active?
         end
 
+        # Checks if the application key is given in the parameters, halts if not.
         def check_application_key
           halt 400, {message: 'missing.app_key'}.to_json if application_key.nil?
         end
 
+        # Checks if the session unique identifier is given in the parameters, halts if not.
         def check_session_id
           halt 400, {message: 'missing.session_id'}.to_json if session_id.nil?
         end
 
+        # Checks if the application linked to the application key exists, halts if not.
         def check_application_existence
           application = Arkaan::OAuth::Application.where(key: application_key).first
           halt 404, {message: 'application_not_found'}.to_json if application.nil?
         end
 
+        # Checks if the session linked to the session identifier exists, halts if not.
+        # @return [Arkaan::Authentication::Session] the session linked to this identifier for further checks.
         def check_session_existence
           session = Arkaan::Authentication::Session.where(id: session_id).first
           halt 404, {message: 'session_not_found'}.to_json if session.nil?
           return session
         end
 
+        # Checks if the session is valid (not currently expired), halts if it's expired.
+        # @param session [Arkaan::Authentication::Session] the session to check the validity of.
         def check_session_validity(session)
           expiration_date = session.created_at.strftime('%s').to_i + session.expiration
           halt 422, {message: 'invalid_session'}.to_json if expiration_date < DateTime.now.strftime('%s').to_i
         end
 
+        # Checks if the account linked to the session can have access to this route, halts if not.
+        # @param session [Arkaan::Authentication::Session] the linked to the user you want to check privileges.
+        # @param route [Arkaan::Monitoring::Route] the route to check the privilege of the user on.
         def check_session_access(session, route)
           authorized = session.account.groups.map(&:route_ids).flatten.include?(route.id)
           halt 401, {message: 'unauthorized'}.to_json if !authorized
@@ -129,10 +143,14 @@ module Controllers
           return params['app_key'] || parsed_body['app_key'] || nil
         end
 
+        # Gets the current session unique identifier as a BSON token.
+        # @return [BSON::ObjectId, NilClass] the unique identifier for the session as an object ID
         def session_id
           return params['session_id'] || parsed_body['session_id'] || nil
         end
 
+        # Returns the current parsed body as a hash, empty if there was none.
+        # @return [Hash] the body given with the request parsed from a JSON formatted string.
         def parsed_body
           tmp_body = JSON.parse(request.body.read.to_s) rescue {}
           request.body.rewind
