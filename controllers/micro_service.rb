@@ -50,11 +50,14 @@ module Controllers
               check_instances_availability
               check_route_activity(route)
               check_application_key
-              check_session_id
               check_application_existence
-              session = check_session_existence
-              check_session_validity(session)
-              check_session_access(session, route)
+              
+              if route.authenticated
+                check_session_id
+                session = check_session_existence
+                check_session_validity(session)
+                check_session_access(session, route)
+              end
                   
               forwarded_to_service = forward_to_service(request)
               halt forwarded_to_service.status, forwarded_to_service.body
