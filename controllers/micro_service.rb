@@ -100,7 +100,7 @@ module Controllers
         # Checks if the session linked to the session identifier exists, halts if not.
         # @return [Arkaan::Authentication::Session] the session linked to this identifier for further checks.
         def check_session_existence
-          session = Arkaan::Authentication::Session.where(id: session_id).first
+          session = Arkaan::Authentication::Session.where(token: session_id).first
           halt 404, {message: 'session_not_found'}.to_json if session.nil?
           return session
         end
