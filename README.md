@@ -51,5 +51,5 @@ To launch the unit test suite, juste execute the `rspec` command, the results wi
 
 ### Number of tests
 
-__Date :__ 18/02/2018 17:37
+__Date :__ 18/02/2018 17:37  
 __Count :__ 96
