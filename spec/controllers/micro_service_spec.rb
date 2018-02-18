@@ -5,8 +5,18 @@ RSpec.describe Controllers::MicroService do
   let!(:application) { create(:application) }
   let!(:gateway) { create(:gateway) }
   let!(:account) { create(:account) }
-  let!(:valid_session) { create(:valid_session, account: account) }
-  let!(:invalid_session) { create(:invalid_session, account: account) }
+  let!(:valid_session) {
+    tmp_session = create(:valid_session, account: account)
+    account.sessions << tmp_session
+    account.save!
+    tmp_session
+  }
+  let!(:invalid_session) { 
+    tmp_session = create(:invalid_session, account: account)
+    account.sessions << tmp_session
+    account.save!
+    tmp_session
+  }
 
   describe 'when everything is active' do
     let!(:service) { create(:service) }

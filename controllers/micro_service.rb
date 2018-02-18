@@ -51,7 +51,7 @@ module Controllers
               check_route_activity(route)
               check_application_key
               check_application_existence
-              
+
               if route.authenticated
                 check_session_id
                 session = check_session_existence

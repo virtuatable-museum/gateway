@@ -27,7 +27,7 @@ GEM
       tzinfo (~> 1.1)
     addressable (2.5.2)
       public_suffix (>= 2.0.2, < 4.0)
-    arkaan (0.7.24)
+    arkaan (0.7.25)
       activemodel (= 5.1.4)
       activesupport (= 5.1.4)
       bcrypt (= 3.1.11)
@@ -135,7 +135,7 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
-  arkaan (= 0.7.24)
+  arkaan (= 0.7.25)
   database_cleaner
   draper (= 3.0.1)
   factory_girl
@@ -150,4 +150,4 @@ DEPENDENCIES
   webmock
 
 BUNDLED WITH
-   1.16.0
+   1.16.1
