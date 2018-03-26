@@ -55,7 +55,6 @@ module Controllers
               if route.authenticated
                 check_session_id
                 session = check_session_existence
-                check_session_validity(session)
                 check_session_access(session, route)
               end
                   
@@ -103,13 +102,6 @@ module Controllers
           session = Arkaan::Authentication::Session.where(token: session_id).first
           halt 404, {message: 'session_not_found'}.to_json if session.nil?
           return session
-        end
-
-        # Checks if the session is valid (not currently expired), halts if it's expired.
-        # @param session [Arkaan::Authentication::Session] the session to check the validity of.
-        def check_session_validity(session)
-          expiration_date = session.created_at.strftime('%s').to_i + session.expiration
-          halt 422, {message: 'invalid_session'}.to_json if expiration_date < DateTime.now.strftime('%s').to_i
         end
 
         # Checks if the account linked to the session can have access to this route, halts if not.

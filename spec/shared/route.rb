@@ -91,17 +91,6 @@ RSpec.shared_examples 'route' do |verb, path|
       expect(last_response.body).to eq({message: 'session_not_found'}.to_json)
     end
   end
-  describe 'Invalid session error' do
-    before do
-      public_send(verb.to_sym, path, format_params(verb, {app_key: application.key, session_id: invalid_session.token}))
-    end
-    it 'returns an Unprocessable Entity (422) error when the session is invalid' do
-      expect(last_response.status).to be 422
-    end
-    it 'returns the correct body when the session is invalid' do
-      expect(last_response.body).to eq({message: 'invalid_session'}.to_json)
-    end
-  end
   describe 'Unauthorized error' do
     let!(:group) {
       tmp_group = create(:group, slug: 'another_group', accounts: [account])
