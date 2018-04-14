@@ -55,7 +55,11 @@ RSpec.shared_examples 'route' do |verb, path|
       expect(last_response.status).to be 400
     end
     it 'returns the correct body when the application key is not given' do
-      expect(last_response.body).to eq({message: 'missing.app_key'}.to_json)
+      expect(last_response.body).to include_json({
+        'status' => 400,
+        'field' => 'app_key',
+        'error' => 'required'
+      })
     end
   end
   describe 'No session identifier error' do
@@ -66,7 +70,11 @@ RSpec.shared_examples 'route' do |verb, path|
       expect(last_response.status).to be 400
     end
     it 'returns the correct body when the session_id is not given' do
-      expect(last_response.body).to eq({message: 'missing.session_id'}.to_json)
+      expect(last_response.body).to include_json({
+        'status' => 400,
+        'field' => 'session_id',
+        'error' => 'required'
+      })
     end
   end
   describe 'Unknown application error' do
@@ -77,7 +85,11 @@ RSpec.shared_examples 'route' do |verb, path|
       expect(last_response.status).to be 404
     end
     it 'returns the correct body when the application is not found' do
-      expect(last_response.body).to eq({message: 'application_not_found'}.to_json)
+      expect(last_response.body).to include_json({
+        'status' => 404,
+        'field' => 'app_key',
+        'error' => 'unknown'
+      })
     end
   end
   describe 'Unknown session error' do
@@ -88,7 +100,11 @@ RSpec.shared_examples 'route' do |verb, path|
       expect(last_response.status).to be 404
     end
     it 'returns the correct body when the session is not found' do
-      expect(last_response.body).to eq({message: 'session_not_found'}.to_json)
+      expect(last_response.body).to include_json({
+        'status' => 404,
+        'field' => 'session_id',
+        'error' => 'unknown'
+      })
     end
   end
   describe 'Unauthorized error' do
@@ -101,11 +117,15 @@ RSpec.shared_examples 'route' do |verb, path|
     before do
       public_send(verb.to_sym, path, format_params(verb, {app_key: application.key, session_id: valid_session.token}))
     end
-    it 'returns an Unauthorized (401) error when the account has no right to access this route' do
-      expect(last_response.status).to be 401
+    it 'returns an Forbidden (403) error when the account has no right to access this route' do
+      expect(last_response.status).to be 403
     end
     it 'returns the correct body when the account cannot access this route' do
-      expect(last_response.body).to eq({message: 'unauthorized'}.to_json)
+      expect(last_response.body).to include_json({
+        'status' => 403,
+        'field' => 'session_id',
+        'error' => 'forbidden'
+      })
     end
   end
 end

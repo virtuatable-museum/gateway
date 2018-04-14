@@ -1,0 +1,15 @@
+errors:
+  common:
+    app_key:
+      required: 'https://github.com/jdr-tools/wiki/wiki/Common-errors#application-key-not-given'
+      unknown: 'https://github.com/jdr-tools/wiki/wiki/Common-errors#application-key-not-found'
+    session_id:
+      forbidden: 'https://github.com/jdr-tools/wiki/wiki/Common-errors#unauthorized-session'
+      required: 'https://github.com/jdr-tools/wiki/wiki/Common-errors#session-id-not-given'
+      unknown: 'https://github.com/jdr-tools/wiki/wiki/Common-errors#session-id-not-found'
+    instance:
+      unavailable: 'https://github.com/jdr-tools/wiki/wiki/Common-errors#no-instance-available'
+    route:
+      inactive: 'https://github.com/jdr-tools/wiki/wiki/Common-errors#inactive-route'
+    service:
+      inactive: 'https://github.com/jdr-tools/wiki/wiki/Common-errors#inactive-service'

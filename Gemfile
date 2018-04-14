@@ -17,4 +17,5 @@ group :test do
   gem 'rack-test', require: 'rack/test'
   gem 'simplecov'
   gem 'webmock', require: 'webmock/rspec'
+  gem 'rspec-json_expectations'
 end

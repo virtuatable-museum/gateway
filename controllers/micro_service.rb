@@ -1,7 +1,7 @@
 module Controllers
   # Factory-like class dynamically producing controllers for each declared micro-service.
   # @author Vincent Courtois <courtois.vincent@outlook.com>
-  class MicroService < Sinatra::Base
+  class MicroService
 
     # Creates a dynamic class for the given service to map it on the gateway.
     # @param service [Arkaan::Monitorjng::Service] the service to create the controller for, used to compute the routes and mapping path.
@@ -12,6 +12,8 @@ module Controllers
       # it's then mapped from the service path.
       # @author Vincent Courtois <courtois.vincent@outlook.com>
       controllerClass = Class.new(Sinatra::Base) do
+        register Sinatra::ConfigFile
+
         # @!attribute [r] forward_tunnel
         #   @return [Faraday] the connection to the instance of the service on which you forward the requests.
         attr_reader :tunnel_to_service
@@ -25,6 +27,8 @@ module Controllers
         # @!attribute [r] stored_service
         #   @return [Arkaan::Monitoring::Service] the stored service representing this controller in the database.
         attr_reader :stored_service
+
+        config_file File.join(File.dirname(__FILE__), '..', 'config', 'errors.yml')
 
         # Each controller is instanciated by giving him the service so it can store it.
         # @param service [Arkaan::Monitoring::Service] the service stored in the database.
@@ -66,41 +70,41 @@ module Controllers
 
         # Checks if the service is currently marked 'active' and halts if not. 
         def check_service_activity
-          halt 400, {message: 'inactive_service'}.to_json if !stored_service.active?      
+          custom_error(400, 'common.service.inactive') if !stored_service.active?      
         end
 
         # Checks if any instance is available on the service, halts if not.
         def check_instances_availability
-          halt 400, {message: 'no_instance_available'}.to_json if stored_service.instances.active.empty?
+          custom_error(400, 'common.instance.unavailable') if stored_service.instances.active.empty?
         end
 
         # Checks if the route is currently marked 'active', halts if not.
         # @param route [Arkaan::Monitoring::Route] the route to check the inactivity of.
         def check_route_activity(route)
-          halt 400, {message: 'inactive_route'}.to_json if !route.active?
+          custom_error(400, 'common.route.inactive') if !route.active?
         end
 
         # Checks if the application key is given in the parameters, halts if not.
         def check_application_key
-          halt 400, {message: 'missing.app_key'}.to_json if application_key.nil?
+          custom_error(400, 'common.app_key.required') if application_key.nil?
         end
 
         # Checks if the session unique identifier is given in the parameters, halts if not.
         def check_session_id
-          halt 400, {message: 'missing.session_id'}.to_json if session_id.nil?
+          custom_error(400, 'common.session_id.required') if session_id.nil?
         end
 
         # Checks if the application linked to the application key exists, halts if not.
         def check_application_existence
           application = Arkaan::OAuth::Application.where(key: application_key).first
-          halt 404, {message: 'application_not_found'}.to_json if application.nil?
+          custom_error(404, 'common.app_key.unknown') if application.nil?
         end
 
         # Checks if the session linked to the session identifier exists, halts if not.
         # @return [Arkaan::Authentication::Session] the session linked to this identifier for further checks.
         def check_session_existence
           session = Arkaan::Authentication::Session.where(token: session_id).first
-          halt 404, {message: 'session_not_found'}.to_json if session.nil?
+          custom_error(404, 'common.session_id.unknown') if session.nil?
           return session
         end
 
@@ -109,7 +113,7 @@ module Controllers
         # @param route [Arkaan::Monitoring::Route] the route to check the privilege of the user on.
         def check_session_access(session, route)
           authorized = session.account.groups.map(&:route_ids).flatten.include?(route.id)
-          halt 401, {message: 'unauthorized'}.to_json if !authorized
+          custom_error(403, 'common.session_id.forbidden') if !authorized
         end
 
         # Forwards a request to the dedicated micro service and returns the response it gave.
@@ -150,6 +154,14 @@ module Controllers
           tmp_body = JSON.parse(request.body.read.to_s) rescue {}
           request.body.rewind
           return tmp_body
+        end
+
+        # Halts the application and creates the returned body from the parameters and the errors config file.
+        # @param status [Integer] the HTTP status to halt the application with.
+        # @param path [String] the path in the configuration file to access the URL.
+        def custom_error(status, path)
+          route, field, error = path.split('.')
+          halt status, {status: status, field: field, error: error, docs: settings.errors[route][field][error]}.to_json
         end
       end
 

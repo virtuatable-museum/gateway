@@ -58,7 +58,11 @@ RSpec.describe Controllers::MicroService do
         expect(last_response.status).to be 400
       end
       it 'returns the correct body when the whole service is inactive' do
-        expect(JSON.parse(last_response.body)).to eq({'message' => 'inactive_service'})
+        expect(JSON.parse(last_response.body)).to include_json({
+          'status' => 400,
+          'field' => 'service',
+          'error' => 'inactive'
+        })
       end
     end
     describe 'when all the instances are inactive' do
@@ -73,7 +77,11 @@ RSpec.describe Controllers::MicroService do
         expect(last_response.status).to be 400
       end
       it 'returns the correct body when all instances are inactive' do
-        expect(JSON.parse(last_response.body)).to eq({'message' => 'no_instance_available'})
+        expect(JSON.parse(last_response.body)).to include_json({
+          'status' => 400,
+          'field' => 'instance',
+          'error' => 'unavailable'
+        })
       end
     end
     describe 'when the route is inactive' do
@@ -88,7 +96,11 @@ RSpec.describe Controllers::MicroService do
         expect(last_response.status).to be 400
       end
       it 'returns the correct body when the route is inactive' do
-        expect(JSON.parse(last_response.body)).to eq({'message' => 'inactive_route'})
+        expect(JSON.parse(last_response.body)).to include_json({
+          'status' => 400,
+          'field' => 'route',
+          'error' => 'inactive'
+        })
       end
     end
   end
