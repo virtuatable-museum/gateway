@@ -6,7 +6,6 @@ FactoryGirl.define do
       firstname 'Vincent'
       lastname  'Courtois'
       email     'courtois.vincent@outlook.com'
-      birthdate DateTime.new(2000, 1, 1)
       password_confirmation 'password'
     end
   end

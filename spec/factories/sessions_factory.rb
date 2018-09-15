@@ -4,12 +4,10 @@ FactoryGirl.define do
 
     factory :valid_session do
       token 'valid_session'
-      expiration 3600
       created_at DateTime.now
     end
     factory :invalid_session do
       token 'invalid_session'
-      expiration 3600
       created_at DateTime.now - 7200
     end
   end

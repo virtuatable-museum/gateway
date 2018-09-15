@@ -35,7 +35,7 @@ module Controllers
         def initialize(service)
           super
           @gateway_token = Utils::Seeder.instance.create_gateway.token
-          @instance = service.instances.sample
+          @instance = get_instance_from(service)
           @stored_service = service
           @tunnel_to_service = Faraday.new(instance.url) do |faraday|
             faraday.request  :url_encoded
@@ -162,6 +162,14 @@ module Controllers
         def custom_error(status, path)
           route, field, error = path.split('.')
           halt status, {status: status, field: field, error: error, docs: settings.errors[route][field][error]}.to_json
+        end
+
+        # Gets an instance from the service, regarding it's test mode value.
+        # @param service [Arkaan::Monitoring::Service] the service to get an instance from.
+        # @return [Arkaan::Monitoring::Instance] the instance to make the queries on.
+        def get_instance_from(service)
+          criteria = (service.test_mode && ENV['RACK_ENV'] == 'development') ? {enum_type: :local} : {:enum_type.ne => :local}
+          return service.instances.where(criteria).first
         end
       end
 
