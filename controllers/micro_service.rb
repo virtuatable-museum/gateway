@@ -37,6 +37,7 @@ module Controllers
           @gateway_token = Utils::Seeder.instance.create_gateway.token
           @instance = get_instance_from(service)
           @stored_service = service
+
           @tunnel_to_service = Faraday.new(instance.url) do |faraday|
             faraday.request  :url_encoded
             faraday.response :logger
@@ -168,7 +169,7 @@ module Controllers
         # @param service [Arkaan::Monitoring::Service] the service to get an instance from.
         # @return [Arkaan::Monitoring::Instance] the instance to make the queries on.
         def get_instance_from(service)
-          criteria = (service.test_mode && ENV['RACK_ENV'] == 'development') ? {enum_type: :local} : {:enum_type.ne => :local}
+          criteria = (service.test_mode && ENV['TEST_MODE']) ? {enum_type: :local} : {:enum_type.ne => :local}
           return service.instances.where(criteria).first
         end
       end
