@@ -14,13 +14,6 @@ module Controllers
       controllerClass = Class.new(Sinatra::Base) do
         register Sinatra::ConfigFile
 
-        # @!attribute [r] forward_tunnel
-        #   @return [Faraday] the connection to the instance of the service on which you forward the requests.
-        attr_reader :tunnel_to_service
-        # @!attribute [r] instance
-        #   @return [Arkaan::Monitoring::Instance] the instance of the service on when the gateway forwards the request.
-        # @todo Make the choice of the instance dynamic for each request, not at creation.
-        attr_reader :instance
         # @!attribute [r] gateway_token
         #   @return [String] the current token of the gateway to enrich the forwarded request with.
         attr_reader :gateway_token
@@ -35,14 +28,7 @@ module Controllers
         def initialize(service)
           super
           @gateway_token = Utils::Seeder.instance.create_gateway.token
-          @instance = get_instance_from(service)
           @stored_service = service
-
-          @tunnel_to_service = Faraday.new(instance.url) do |faraday|
-            faraday.request  :url_encoded
-            faraday.response :logger
-            faraday.adapter  Faraday.default_adapter
-          end
 
           # Here is the big piece. Each route is declared from the routes stored in the database, forwarding it automatically
           # to the route with the same method and URL on the service, forwarding parameters and body as they are, just adding the
@@ -76,7 +62,7 @@ module Controllers
 
         # Checks if any instance is available on the service, halts if not.
         def check_instances_availability
-          custom_error(400, 'common.instance.unavailable') if stored_service.instances.active.empty?
+          custom_error(400, 'common.instance.unavailable') if stored_service.instances.where(running: true, active: true).empty?
         end
 
         # Checks if the route is currently marked 'active', halts if not.
@@ -128,7 +114,8 @@ module Controllers
           else
             complete_body['token'] = gateway_token
           end
-          tunnel_to_service.public_send(forwarded_to_service.env['REQUEST_METHOD'].downcase) do |req|
+          # require 'pry'; binding.pry
+          get_connection.public_send(forwarded_to_service.env['REQUEST_METHOD'].downcase) do |req|
             req.url "#{stored_service.path}#{forwarded_to_service.path_info}", parameters || {}
             req.body = complete_body.to_json
             req.headers['Content-Type'] = 'application/json'
@@ -171,6 +158,30 @@ module Controllers
         def get_instance_from(service)
           criteria = (service.test_mode && ENV['TEST_MODE']) ? {enum_type: :local} : {:enum_type.ne => :local}
           return service.instances.where(criteria).first
+        end
+
+        # Creates a faraday connection to either a random instance, or the desired instance in the service.
+        # @return [Faraday] a faraday connection to forward the request into.
+        def get_connection
+          instance = tmp_instance = get_instance(params['instance_id']) || get_random_instance
+          return Faraday.new(instance.url) do |faraday|
+            faraday.request  :url_encoded
+            faraday.response :logger
+            faraday.adapter  Faraday.default_adapter
+          end
+        end
+
+        # Gets the instance from the instance_id given in parameter, if sh'e up and running.
+        # @param instance_id [String] the unique identifier of the instance to get.
+        # @return [Arkaan::Monitoring::Instance] an instance to forward the request to.
+        def get_instance(instance_id)
+          return stored_service.instances.where(_id: params['instance_id'], running: true, active: true).first
+        end
+
+        # Returns a random up and running instance of the service.
+        # @return [Arkaan::Monitoring::Instance] an instance to forward the request to.
+        def get_random_instance
+          return stored_service.instances.where(running: true, active: true).sample
         end
       end
 
