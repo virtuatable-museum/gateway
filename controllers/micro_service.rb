@@ -13,6 +13,12 @@ module Controllers
       # @author Vincent Courtois <courtois.vincent@outlook.com>
       controllerClass = Class.new(Sinatra::Base) do
         register Sinatra::ConfigFile
+        helpers Sinatra::CustomLogger
+
+        configure do
+          set :logger, Logger.new(STDOUT)
+          logger.level = Logger::ERROR if ENV['RACK_ENV'] == 'test'
+        end
 
         # @!attribute [r] gateway_token
         #   @return [String] the current token of the gateway to enrich the forwarded request with.
@@ -114,6 +120,17 @@ module Controllers
           else
             complete_body['token'] = gateway_token
           end
+
+          logger.info('==================== REQUEST ====================')
+          logger.info("Verb : #{forwarded_to_service.env['REQUEST_METHOD']}")
+          logger.info("Session ID : #{session.id.to_s}")
+          logger.info("URL : #{stored_service.path}#{forwarded_to_service.path_info}")
+          logger.info("Parameters :")
+          logger.info(parameters.to_json)
+          logger.info("Body :")
+          logger.info(complete_body.to_json)
+          logger.info('================== END REQUEST ==================')
+
           # require 'pry'; binding.pry
           get_connection.public_send(forwarded_to_service.env['REQUEST_METHOD'].downcase) do |req|
             req.url "#{stored_service.path}#{forwarded_to_service.path_info}", parameters || {}
