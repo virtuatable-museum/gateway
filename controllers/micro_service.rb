@@ -149,6 +149,17 @@ module Controllers
         # @param path [String] the path in the configuration file to access the URL.
         def custom_error(status, path)
           route, field, error = path.split('.')
+          docs = settings.errors[route][field][error] rescue ''
+          logger.info('==================== ERROR ====================')
+          logger.info("Status : #{status}")
+          logger.info("Error message : #{path}")
+          logger.info("Parameters were :")
+          params.each do |key, value|
+            logger.info("#{key} :: #{value}")
+          end
+          request.body.rewind
+          logger.info("JSON body was : #{request.body.read.to_s}")
+          logger.info('================== END ERROR ==================')
           halt status, {status: status, field: field, error: error, docs: settings.errors[route][field][error]}.to_json
         end
 
