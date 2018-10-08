@@ -1,5 +1,6 @@
 require 'bundler'
 Bundler.require :test
+require 'sinatra/custom_logger'
 
 require File.join(File.dirname(__FILE__), '..', 'utils', 'seeder.rb')
 require File.join(File.dirname(__FILE__), '..', 'controllers', 'micro_service.rb')

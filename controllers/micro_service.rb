@@ -123,7 +123,6 @@ module Controllers
 
           logger.info('==================== REQUEST ====================')
           logger.info("Verb : #{forwarded_to_service.env['REQUEST_METHOD']}")
-          logger.info("Session ID : #{session.id.to_s}")
           logger.info("URL : #{stored_service.path}#{forwarded_to_service.path_info}")
           logger.info("Parameters :")
           logger.info(parameters.to_json)
