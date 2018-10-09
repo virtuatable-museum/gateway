@@ -41,17 +41,26 @@ module Controllers
           # gateway token.
           stored_service.routes.each do |route|
             self.class.public_send(route.verb, route.path) do
+              logger.info('Nominal case : reload of the service')
               stored_service.reload
 
+              logger.info('Nominal case : Check if the service is active')
               check_service_activity
+              logger.info('Nominal case : check if any instance is available')
               check_instances_availability
+              logger.info('Nominal case : check if the route is currently active')
               check_route_activity(route)
+              logger.info('Nominal case : check the application key')
               check_application_key
+              logger.info('Nominal case : check if the application exists')
               check_application_existence
 
               if route.authenticated
+                logger.info('Authenticated case : check the session ID')
                 check_session_id
+                logger.info('Authenticated case : check the session existence')
                 session = check_session_existence
+                logger.info('Authenticated case : check the session permissions')
                 check_session_access(session, route)
               end
                   
