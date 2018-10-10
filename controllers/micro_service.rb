@@ -41,26 +41,17 @@ module Controllers
           # gateway token.
           stored_service.routes.each do |route|
             self.class.public_send(route.verb, route.path) do
-              logger.info('Nominal case : reload of the service')
               stored_service.reload
 
-              logger.info('Nominal case : Check if the service is active')
               check_service_activity
-              logger.info('Nominal case : check if any instance is available')
               check_instances_availability
-              logger.info('Nominal case : check if the route is currently active')
               check_route_activity(route)
-              logger.info('Nominal case : check the application key')
               check_application_key
-              logger.info('Nominal case : check if the application exists')
               check_application_existence
 
               if route.authenticated
-                logger.info('Authenticated case : check the session ID')
                 check_session_id
-                logger.info('Authenticated case : check the session existence')
                 session = check_session_existence
-                logger.info('Authenticated case : check the session permissions')
                 check_session_access(session, route)
               end
                   
@@ -130,15 +121,6 @@ module Controllers
             complete_body['token'] = gateway_token
           end
 
-          logger.info('==================== REQUEST ====================')
-          logger.info("Verb : #{forwarded_to_service.env['REQUEST_METHOD']}")
-          logger.info("URL : #{stored_service.path}#{forwarded_to_service.path_info}")
-          logger.info("Parameters :")
-          logger.info(parameters.to_json)
-          logger.info("Body :")
-          logger.info(complete_body.to_json)
-          logger.info('================== END REQUEST ==================')
-
           # require 'pry'; binding.pry
           get_connection.public_send(forwarded_to_service.env['REQUEST_METHOD'].downcase) do |req|
             req.url "#{stored_service.path}#{forwarded_to_service.path_info}", parameters || {}
@@ -175,16 +157,6 @@ module Controllers
         def custom_error(status, path)
           route, field, error = path.split('.')
           docs = settings.errors[route][field][error] rescue ''
-          logger.info('==================== ERROR ====================')
-          logger.info("Status : #{status}")
-          logger.info("Error message : #{path}")
-          logger.info("Parameters were :")
-          params.each do |key, value|
-            logger.info("#{key} :: #{value}")
-          end
-          request.body.rewind
-          logger.info("JSON body was : #{request.body.read.to_s}")
-          logger.info('================== END ERROR ==================')
           halt status, {status: status, field: field, error: error, docs: settings.errors[route][field][error]}.to_json
         end
 
