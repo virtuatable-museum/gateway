@@ -26,6 +26,9 @@ module Controllers
         # @!attribute [r] stored_service
         #   @return [Arkaan::Monitoring::Service] the stored service representing this controller in the database.
         attr_reader :stored_service
+        # @!attribute [r] stored_self
+        #   @return [Arkaan::Monitoring::Gateway] the stored gateway currently running as this application instance.
+        attr_reader :stored_self
 
         config_file File.join(File.dirname(__FILE__), '..', 'config', 'errors.yml')
 
@@ -35,6 +38,7 @@ module Controllers
           super
           @gateway_token = Utils::Seeder.instance.create_gateway.token
           @stored_service = service
+          @stored_self = Utils::Seeder.instance.create_gateway
 
           # Here is the big piece. Each route is declared from the routes stored in the database, forwarding it automatically
           # to the route with the same method and URL on the service, forwarding parameters and body as they are, just adding the
@@ -171,8 +175,7 @@ module Controllers
         # Creates a faraday connection to either a random instance, or the desired instance in the service.
         # @return [Faraday] a faraday connection to forward the request into.
         def get_connection
-          instance = tmp_instance = get_instance(params['instance_id']) || get_random_instance
-          return Faraday.new(instance.url) do |faraday|
+          return Faraday.new(get_instance(params['instance_id']).url) do |faraday|
             faraday.request  :url_encoded
             faraday.response :logger
             faraday.adapter  Faraday.default_adapter
@@ -182,14 +185,19 @@ module Controllers
         # Gets the instance from the instance_id given in parameter, if sh'e up and running.
         # @param instance_id [String] the unique identifier of the instance to get.
         # @return [Arkaan::Monitoring::Instance] an instance to forward the request to.
-        def get_instance(instance_id)
-          return stored_service.instances.where(_id: params['instance_id'], running: true, active: true).first
-        end
-
-        # Returns a random up and running instance of the service.
-        # @return [Arkaan::Monitoring::Instance] an instance to forward the request to.
-        def get_random_instance
-          return stored_service.instances.where(running: true, active: true).sample
+        def get_instance(instance_id = nil)
+          parameters = {
+            running: true,
+            active: true
+          }
+          parameters[:_id] = params['instance_id'] if params.has_key?('instance_id')
+          if stored_self.type_local?
+            instance = stored_service.instances.where(parameters.merge({enum_type: :local})).first
+            instance = stored_service.instances.where(parameters).first if instance.nil?
+            return instance
+          else
+            return stored_service.instances.where(parameters).first
+          end
         end
       end
 
