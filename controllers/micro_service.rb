@@ -46,6 +46,7 @@ module Controllers
           stored_service.routes.each do |route|
             self.class.public_send(route.verb, route.path) do
               stored_service.reload
+              route.reload
 
               check_service_activity
               check_instances_availability
@@ -192,7 +193,8 @@ module Controllers
           }
           parameters[:_id] = params['instance_id'] if params.has_key?('instance_id')
           if stored_self.type_local?
-            instance = stored_service.instances.where(parameters.merge({enum_type: :local})).first
+            local_instances = stored_service.instances.all.to_a.select { |instance| instance.type_local? }
+            instance = local_instances.first
             instance = stored_service.instances.where(parameters).first if instance.nil?
             return instance
           else
