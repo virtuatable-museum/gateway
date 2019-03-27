@@ -4,6 +4,22 @@ RSpec.describe Controllers::Default do
     Controllers::Default.new
   end
 
+  describe 'GET /gateway' do
+    let!(:gateway) { create(:gateway, active: true, running: true) }
+
+    describe 'Nominal case' do
+      before do
+        get '/gateway'
+      end
+      it 'Returns a 200 (OK) status code' do
+        expect(last_response.status).to be 200
+      end
+      it 'Returns the correct body' do
+        expect(JSON.parse(last_response.body)).to eq([gateway.url])
+      end
+    end
+  end
+
   describe 'GET request' do
     before do
       get '/anything'
@@ -15,6 +31,7 @@ RSpec.describe Controllers::Default do
       expect(last_response.body).to eq({message: 'path_not_found'}.to_json)
     end
   end
+
   describe 'POST request' do
     before do
       post '/anything'
@@ -26,6 +43,7 @@ RSpec.describe Controllers::Default do
       expect(last_response.body).to eq({message: 'path_not_found'}.to_json)
     end
   end
+
   describe 'PUT request' do
     before do
       put '/anything'
@@ -37,6 +55,7 @@ RSpec.describe Controllers::Default do
       expect(last_response.body).to eq({message: 'path_not_found'}.to_json)
     end
   end
+
   describe 'DELETE request' do
     before do
       delete '/anything'
