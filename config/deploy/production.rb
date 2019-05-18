@@ -34,7 +34,7 @@ server '51.15.233.214', user: 'deploy', roles: %w{web}
 
 
 # Custom SSH Option
-s# ==================
+# ==================
 # You may pass any option but keep in mind that net/ssh understands a
 # limited set of options, consult the Net::SSH documentation.
 # http://net-ssh.github.io/net-ssh/classes/Net/SSH.html#method-c-start
