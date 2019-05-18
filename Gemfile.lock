@@ -29,10 +29,12 @@ GEM
       public_suffix (>= 2.0.2, < 4.0)
     airbrussh (1.3.1)
       sshkit (>= 1.6.1, != 1.7.0)
-    arkaan (1.2.13)
+    arkaan (1.4.7)
       activemodel (= 5.1.4)
       activesupport (= 5.1.4)
       bcrypt (= 3.1.11)
+      dotenv (= 2.7.2)
+      draper (= 3.0.1)
       faraday (= 0.15.2)
       mongoid (= 7.0.1)
       platform-api (= 2.1.0)
@@ -69,7 +71,7 @@ GEM
       request_store (~> 1.0)
     erubi (1.7.0)
     erubis (2.7.0)
-    excon (0.62.0)
+    excon (0.64.0)
     factory_girl (4.9.0)
       activesupport (>= 3.0.0)
     faraday (0.15.2)
@@ -170,7 +172,7 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
-  arkaan (= 1.2.13)
+  arkaan (= 1.4.7)
   capistrano (= 3.11.0)
   capistrano-bundler (= 1.5.0)
   capistrano-rvm (= 0.1.1)

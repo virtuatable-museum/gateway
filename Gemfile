@@ -4,7 +4,7 @@ group :development, :production, :test do
   gem 'sinatra'        , '2.0.1', require: 'sinatra/base'
   gem 'sinatra-contrib', '2.0.1'
   gem 'mongoid'        , '7.0.1'
-  gem 'arkaan'         , '1.2.13'
+  gem 'arkaan'         , '1.4.7'
   gem 'draper'         , '3.0.1'
   gem 'faraday'        , '0.15.2'
   gem 'pry'            , '0.11.1'
