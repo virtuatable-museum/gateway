@@ -195,7 +195,7 @@ module Controllers
           if stored_self.type_local?
             local_instances = stored_service.instances.all.to_a.select { |instance| instance.type_local? }
             instance = local_instances.first
-            instance = stored_service.instances.where(parameters).first if instance.nil?
+            instance = stored_service.instances.where({running: true, active: true}).first if instance.nil?
             return instance
           else
             return stored_service.instances.where(parameters).first

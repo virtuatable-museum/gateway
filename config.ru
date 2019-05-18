@@ -2,6 +2,8 @@ require 'bundler'
 Bundler.require(ENV['RACK_ENV'].to_sym || :development)
 require 'sinatra/custom_logger'
 
+Dotenv.load
+
 Mongoid.load!(File.join(File.dirname(__FILE__), 'config', 'mongoid.yml'))
 
 require './controllers/default.rb'
