@@ -53,8 +53,6 @@ module Controllers
               stored_service.reload
               route.reload
 
-              initialize_logs
-
               check_service_activity
               check_instances_availability
               check_route_activity(route)
@@ -79,13 +77,6 @@ module Controllers
               halt 404, {message: 'path_not_found'}.to_json
             end
           end
-        end
-
-        def initialize_logs
-          log_folder = File.absolute_path(File.join(settings.root, '..', 'log'))
-          error_log = File.new(File.join(log_folder, 'error.log'),"a+")
-          error_log.sync = true
-          env["rack.errors"] = error_log
         end
 
         # Checks if the service is currently marked 'active' and halts if not. 
