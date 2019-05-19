@@ -47,7 +47,7 @@ module Controllers
           # to the route with the same method and URL on the service, forwarding parameters and body as they are, just adding the
           # gateway token.
           stored_service.routes.each do |route|
-            logger.info("Démarrage de la route #{route.verb} /#{stored_service.key}#{route.path}")
+            # logger.info("Démarrage de la route #{route.verb} /#{stored_service.key}#{route.path}")
 
             self.class.public_send(route.verb, route.path) do
               stored_service.reload
@@ -69,12 +69,21 @@ module Controllers
                   
               forwarded_to_service = forward_to_service(request)
               halt forwarded_to_service.status, forwarded_to_service.body
+
+              halt 200, 'teub'
+            end
+          end
+
+          ['get', 'post', 'put', 'delete'].each do |meth|
+            self.class.public_send(meth, '/*') do
+              halt 404, {message: 'path_not_found'}.to_json
             end
           end
         end
 
         def initialize_logs
-          error_log = ::File.new("log/error.log","a+")
+          log_folder = File.absolute_path(File.join(settings.root, '..', 'log'))
+          error_log = File.new(File.join(log_folder, 'error.log'),"a+")
           error_log.sync = true
           env["rack.errors"] = error_log
         end
