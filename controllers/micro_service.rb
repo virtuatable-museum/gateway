@@ -47,7 +47,7 @@ module Controllers
           # to the route with the same method and URL on the service, forwarding parameters and body as they are, just adding the
           # gateway token.
           stored_service.routes.each do |route|
-            logger.info("Démarrage de la route #{route.verb} #{route.path}")
+            logger.info("Démarrage de la route #{route.verb} /#{stored_service.key}#{route.path}")
 
             self.class.public_send(route.verb, route.path) do
               stored_service.reload
