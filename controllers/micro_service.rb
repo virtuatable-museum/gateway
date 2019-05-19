@@ -16,8 +16,11 @@ module Controllers
         helpers Sinatra::CustomLogger
 
         configure do
-          set :logger, Logger.new(STDOUT)
-          logger.level = Logger::ERROR if ENV['RACK_ENV'] == 'test'
+          Dir.mkdir('log') if !File.exists?('log')
+          Logger.class_eval { alias :write :'<<' }
+          common_logs = Logger.new('log/common.log', 'weekly', level: Logger::INFO)
+          set :logger, common_logs
+          use Rack::CommonLogger, common_logs
         end
 
         # @!attribute [r] gateway_token
@@ -44,9 +47,13 @@ module Controllers
           # to the route with the same method and URL on the service, forwarding parameters and body as they are, just adding the
           # gateway token.
           stored_service.routes.each do |route|
+            logger.info("Démarrage de la route #{route.verb} #{route.path}")
+
             self.class.public_send(route.verb, route.path) do
               stored_service.reload
               route.reload
+
+              initialize_logs
 
               check_service_activity
               check_instances_availability
@@ -64,6 +71,12 @@ module Controllers
               halt forwarded_to_service.status, forwarded_to_service.body
             end
           end
+        end
+
+        def initialize_logs
+          error_log = ::File.new("log/error.log","a+")
+          error_log.sync = true
+          env["rack.errors"] = error_log
         end
 
         # Checks if the service is currently marked 'active' and halts if not. 
