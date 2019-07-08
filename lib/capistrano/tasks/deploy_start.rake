@@ -16,8 +16,12 @@ namespace :deploy do
 
   desc 'Starts the server'
   task :start => 'stop' do
-    pid_file = "/tmp/#{fetch(:application)}.pid"
-    execute :bundle, "exec rackup -p #{fetch(:app_port)} --env production -o 0.0.0.0 -P #{pid_file} --daemonize"
+    on roles(:all) do
+      within current_path do
+        pid_file = "/tmp/#{fetch(:application)}.pid"
+        execute :bundle, "exec rackup -p #{fetch(:app_port)} --env production -o 0.0.0.0 -P #{pid_file} --daemonize"
+      end
+    end
   end
 
   after :finishing, :start
