@@ -4,9 +4,10 @@ namespace :deploy do
     on roles(:all) do
       within current_path do
         pid_file = "/tmp/#{fetch(:application)}.pid"
-        if test("[ -f #{pid_file}.pid ]")
+        puts "Recherche du fichier #{pid_file}"
+        if test("[ -f #{pid_file} ]")
           puts 'Le fichier du PID a bien été trouvé et va être supprimé.'
-          execute :kill, "-9 `cat #{pid_file}.pid`"
+          execute :kill, "-9 `cat #{pid_file}`"
         else
           puts "Le fichier du PID n'a pas été trouvé et ne peux pas être supprimé."
         end
