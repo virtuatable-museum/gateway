@@ -71,7 +71,7 @@ GEM
       request_store (~> 1.0)
     erubi (1.7.0)
     erubis (2.7.0)
-    excon (0.64.0)
+    excon (0.71.0)
     factory_girl (4.9.0)
       activesupport (>= 3.0.0)
     faraday (0.15.2)
